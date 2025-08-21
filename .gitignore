@@ -1,0 +1,33 @@
+# --- ENTORNO VIRTUAL PYTHON ---
+venv/
+.venv/
+
+# --- ARCHIVOS DE PYTHON ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- DJANGO ---
+db.sqlite3
+media/
+staticfiles/
+
+# --- VARIABLES DE ENTORNO ---
+.env
+*.env
+
+# --- NODE / REACT ---
+node_modules/
+build/
+dist/
+.cache/
+.npm/
+.yarn/
+
+# --- LOGS ---
+*.log
+
+# --- OTROS ---
+.DS_Store
+Thumbs.db
