@@ -2,16 +2,9 @@ from rest_framework import serializers
 from django.utils import timezone
 from .models import Paciente, Cita
 
-class PacienteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Paciente
-        fields = ['id', 'nombre', 'apellido']
-
-
+# 1. Primero definimos CitaSerializer sin usar PacienteSerializer aún
 class CitaSerializer(serializers.ModelSerializer):
-    # Mostrar los datos del paciente (anidado)
-    paciente = PacienteSerializer(read_only=True)
-    # Para crear citas indicando el id del paciente
+    paciente = serializers.StringRelatedField(read_only=True)
     paciente_id = serializers.PrimaryKeyRelatedField(
         queryset=Paciente.objects.all(),
         source="paciente",
@@ -23,7 +16,14 @@ class CitaSerializer(serializers.ModelSerializer):
         fields = ['id', 'fecha', 'hora', 'paciente', 'paciente_id']
 
     def validate(self, data):
-        # Validación extra: no permitir citas en el pasado
         if data["fecha"] < timezone.now().date():
             raise serializers.ValidationError({"fecha": "La fecha no puede estar en el pasado"})
         return data
+
+# 2. Luego definimos PacienteSerializer, que SÍ puede usar CitaSerializer ahora
+class PacienteSerializer(serializers.ModelSerializer):
+    citas = CitaSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Paciente
+        fields = ['id', 'nombre', 'apellido', 'citas']

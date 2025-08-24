@@ -1,30 +1,11 @@
-import { useEffect, useState } from "react";
-import api from "../api"; // este es el axios con baseURL desde .env
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
 
-interface Paciente {
-  id: number;
-  nombre: string;
-  apellido: string;
-}
-
-export default function PacientesPage() {
-  const [pacientes, setPacientes] = useState<Paciente[]>([]);
+export default function PacienteForm() {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
-
-  // 📌 Cargar lista de pacientes al inicio
-  useEffect(() => {
-    fetchPacientes();
-  }, []);
-
-  const fetchPacientes = async () => {
-    try {
-      const res = await api.get("/pacientes/");
-      setPacientes(res.data);
-    } catch (err) {
-      console.error("Error al obtener pacientes:", err);
-    }
-  };
+  const navigate = useNavigate();
 
   const addPaciente = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,67 +13,37 @@ export default function PacientesPage() {
       await api.post("/pacientes/", { nombre, apellido });
       setNombre("");
       setApellido("");
-      fetchPacientes();
-    } catch (err) {
+      navigate("/"); // redirige al inicio después de agregar
+    } catch (err: any) {
+      alert("Error al agregar paciente: " + (err.response?.data?.detail || err.message));
       console.error("Error al agregar paciente:", err);
     }
   };
 
-  const deletePaciente = async (id: number) => {
-    try {
-      await api.delete(`/pacientes/${id}/`);
-      fetchPacientes();
-    } catch (err) {
-      console.error("Error al eliminar paciente:", err);
-    }
-  };
-
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Gestión de Pacientes</h1>
-
-      {/* Formulario agregar paciente */}
-      <form onSubmit={addPaciente} className="mb-6 flex gap-2">
+    <div style={{ maxWidth: 400, margin: "auto", padding: 20 }}>
+      <h1>Agregar Paciente</h1>
+      <form onSubmit={addPaciente} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <input
           type="text"
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          className="border p-2 flex-1 rounded"
           required
+          style={{ padding: 8, fontSize: 16 }}
         />
         <input
           type="text"
           placeholder="Apellido"
           value={apellido}
           onChange={(e) => setApellido(e.target.value)}
-          className="border p-2 flex-1 rounded"
           required
+          style={{ padding: 8, fontSize: 16 }}
         />
-        <button type="submit" className="bg-blue-500 text-white px-4 rounded">
+        <button type="submit" style={{ padding: 10, fontSize: 16, cursor: "pointer" }}>
           Agregar
         </button>
       </form>
-
-      {/* Lista de pacientes */}
-      <ul className="space-y-2">
-        {pacientes.map((pac) => (
-          <li
-            key={pac.id}
-            className="flex justify-between items-center border p-2 rounded"
-          >
-            <span>
-              {pac.nombre} {pac.apellido}
-            </span>
-            <button
-              onClick={() => deletePaciente(pac.id)}
-              className="bg-red-500 text-white px-2 py-1 rounded"
-            >
-              Eliminar
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

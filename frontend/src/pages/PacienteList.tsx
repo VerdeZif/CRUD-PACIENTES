@@ -1,87 +1,115 @@
-import { useState , useEffect} from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
 
-type Paciente = {
+interface Cita {
   id: number;
-  name: string;
-  lastname: string;
   fecha: string;
-  time: string;
-  paciente: string;
-};
+  hora: string;
+}
 
+interface Paciente {
+  id: number;
+  nombre: string;
+  apellido: string;
+  citas: Cita[];
+}
 
-function PacienteList() {
-  const [repaciente, setRepaciente] = useState<Paciente[]>([]);
+export default function PacienteList() {
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("http://localhost:8000/api/pacientes/") // backend de Django
-      .then((res) => res.json())
-      .then((data) => {
-        setRepaciente(data); 
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error al cargar pacientes:", error);
-        setLoading(false);
-      });
-  }, []);
-
-  const elim = (index: number) => {
-    if (confirm("Desea eliminar al paciente")) {
-      setRepaciente((pas) => pas.filter((_, i) => i !== index));
+  const fetchPacientes = async () => {
+    try {
+      const res = await api.get("/pacientes/");
+      setPacientes(res.data);
+    } catch (err) {
+      console.error("Error al cargar pacientes:", err);
+      setError("Error al cargar pacientes");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return <p>Cargando datos...</p>;
+  useEffect(() => {
+    fetchPacientes();
+  }, []);
+
+  const eliminarPaciente = async (pacienteId: number) => {
+    if (confirm("¿Seguro que deseas eliminar este paciente?")) {
+      try {
+        await api.delete(`/pacientes/${pacienteId}/`);
+        await fetchPacientes();
+      } catch (err) {
+        console.error("Error al eliminar paciente:", err);
+        alert("Error al eliminar paciente");
+      }
+    }
   };
 
+  if (loading) return <p>Cargando datos...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+
   return (
-    <main>
-      <div className="main-register">
-        <div className="etiquetas">❤️❌👌👌</div>
-        <div className="table-map">
-          <table border={1}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>NOMBRE</th>
-                <th>APELLIDO</th>
-                <th>FECHA</th>
-                <th>HORA</th>
-                <th>PACIENTE</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {repaciente.length === 0 ?(
-                <tr>              
-                    <td colSpan={7} style={{textAlign: "center"}}>
-                        hoy nada nada
-                    </td>             
-                </tr>
-              ):(repaciente.map((paciente, index) => (
-                <tr key={paciente.id}>
-                  <td>{paciente.id}</td>
-                  <td>{paciente.name}</td>
-                  <td>{paciente.lastname}</td>
-                  <td>{paciente.fecha}</td>
-                  <td>{paciente.time}</td>
-                  <td>{paciente.paciente}</td>
-                  <td>
-                    <button >Editar</button>
-                    <button onClick={() => elim(index)}>Eliminar</button>
-                  </td>
-                </tr>
-              )
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </main>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Pacientes y Citas</h1>
+
+      <table className="table-auto w-full border-collapse border border-gray-300">
+        <thead>
+          <tr style={{ backgroundColor: "#f0f0f0" }}>
+            <th className="border p-2">#</th>
+            <th className="border p-2">Nombre</th>
+            <th className="border p-2">Apellido</th>
+            <th className="border p-2">Citas</th>
+            <th className="border p-2">Opciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pacientes.map((paciente) => (
+            <tr key={paciente.id}>
+              <td className="border p-2">{paciente.id}</td>
+              <td className="border p-2">{paciente.nombre}</td>
+              <td className="border p-2">{paciente.apellido}</td>
+              <td className="border p-2">
+                {paciente.citas.length > 0 ? (
+                  <ul style={{ paddingLeft: "1rem" }}>
+                    {paciente.citas.map((cita) => (
+                      <li key={cita.id}>
+                        📅 {cita.fecha} ⏰ {cita.hora}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span>Sin citas</span>
+                )}
+              </td>
+              <td className="border p-2 flex-buttons">
+                <button
+                  onClick={() => navigate(`/pacientes/editar/${paciente.id}`)}
+                >
+                  Editar Paciente
+                </button>
+
+                {paciente.citas.length > 0 && (
+                  <button
+                    onClick={() =>
+                      navigate(`/citas/editar/${paciente.citas[0].id}`)
+                    }
+                  >
+                    Editar Cita
+                  </button>
+                )}
+
+                <button onClick={() => eliminarPaciente(paciente.id)}>
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
-
-export default PacienteList
