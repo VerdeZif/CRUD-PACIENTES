@@ -69,7 +69,7 @@ const CitaForm: React.FC = () => {
         style={{
           maxWidth: "400px",
           width: "100%",
-          backgroundColor: "#e2dedeff",
+          backgroundColor: "#d0cbddab",
           padding: "30px",
           borderRadius: "8px",
           boxShadow: "0 4px 8px rgba(0,0,0,0.1)",

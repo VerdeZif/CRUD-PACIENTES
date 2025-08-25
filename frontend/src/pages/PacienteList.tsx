@@ -58,7 +58,7 @@ export default function PacienteList() {
 
       <table className="table-auto w-full border-collapse border border-gray-300">
         <thead>
-          <tr style={{ backgroundColor: "#f0f0f0" }}>
+          <tr style={{ backgroundColor: "#b4b2b4ff" }}>
             <th className="border p-2">#</th>
             <th className="border p-2">Nombre</th>
             <th className="border p-2">Apellido</th>

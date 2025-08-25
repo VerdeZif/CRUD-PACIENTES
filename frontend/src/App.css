@@ -15,7 +15,7 @@ body {
 
 /* Navbar */
 .navbar {
-  background-color: #faecec;
+  background-color: #78a0dbc4;
   padding: 16px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   text-align: center;
@@ -38,14 +38,14 @@ body {
 /* Links */
 .nav-link {
   text-decoration: none;
-  color: #007bff;
+  color: #35170398;
   padding: 8px 16px;
   border-radius: 4px;
   transition: background-color 0.3s;
 }
 
 .nav-link:hover {
-  background-color: #f7d5d5;
+  background-color: #b38282;
 }
 
 .nav-link.active {
@@ -86,7 +86,7 @@ body {
 /* -- Estilos para modo oscuro -- */
 body.dark-mode {
   background-color: #121212;
-  color: #eee;
+  color: #666262;
 }
 
 body.dark-mode .navbar {
